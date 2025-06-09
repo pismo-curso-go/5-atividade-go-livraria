@@ -1,0 +1,28 @@
+## Siga as instruções abaixo:
+
+Como participar
+
+- Clone este repositório na sua máquina.
+- Partindo da branch main crie uma nova branch com seu-nome.
+- Agora, na sua branch, crie uma pasta com seu nome: seu-nome/.
+- Resolva a atividade.
+- Quando terminar, suba sua branch e abra um Pull Request para a branch `release`.
+
+## Atividade
+
+Você deve criar uma API que gerencie livros. Ela deverá conter as seguintes funcionalidades:
+
+- Listar todos os livros (GET /livros)
+- Buscar um livro pelo ID (GET /livros/{id})
+- Adicionar um novo livro (POST /livros)
+- Remover um livro pelo ID (DELETE /livros/{id})
+
+#Desafio adicional:
+- Editar os dados de um livro (PUT /livros/{id})
+- Editar o status de leitura do livro (PATCH /livros/{id}/lido)
+
+#Regras:
+
+- Os dados devem ser armazenados em memória (slice).
+- Cada livro deve conter um ID numérico, título, autor e status de leitura (lido ou não).
+- Cada funcionalidade deve ter sua própria função.
