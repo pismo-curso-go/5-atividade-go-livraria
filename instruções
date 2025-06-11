@@ -3,8 +3,7 @@
 Como participar
 
 - Clone este repositório na sua máquina.
-- Partindo da branch main crie uma nova branch com seu-nome.
-- Agora, na sua branch, crie uma pasta com seu nome: seu-nome/.
+- Partindo da branch main crie uma nova branch com o nome da dupla, exemplo: marcus-jhonatan.
 - Resolva a atividade.
 - Quando terminar, suba sua branch e abra um Pull Request para a branch `release`.
 
