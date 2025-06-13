@@ -31,7 +31,7 @@ func booksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleGetBooks(w http.ResponseWriter, r *http.Request) {
+func handleGetBooks(w http.ResponseWriter, _ *http.Request) {
 	books := internal.GetAllBooks()
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(books)
@@ -53,7 +53,7 @@ func handleAddBook(w http.ResponseWriter, r *http.Request) {
 
 func bookByIDHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/books/")
-	idStr = strings.TrimSuffix(idStr, "/read") 
+	idStr = strings.TrimSuffix(idStr, "/read")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "invalid ID", http.StatusBadRequest)
@@ -61,21 +61,27 @@ func bookByIDHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch r.Method {
-			case http.MethodGet:
+	case http.MethodGet:
 		handleGetBookByID(w, r, id)
 	case http.MethodPut:
 		handleUpdateBook(w, r, id)
 	case http.MethodPatch:
 		handleUpdateReadStatus(w, r, id)
-			case http.MethodDelete:
+	case http.MethodDelete:
 		handleDeleteBook(w, r, id)
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
-func handleGetBookByID(w http.ResponseWriter, r *http.Request, id int) {
-  // todo
+func handleGetBookByID(w http.ResponseWriter, _ *http.Request, id int) {
+	book, err := internal.GetBookByID(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(book)
 }
 
 func handleUpdateBook(w http.ResponseWriter, r *http.Request, id int) {
@@ -115,6 +121,9 @@ func handleUpdateReadStatus(w http.ResponseWriter, r *http.Request, id int) {
 	json.NewEncoder(w).Encode(book)
 }
 
-func handleDeleteBook(w http.ResponseWriter, r *http.Request, id int) {
-	// todo
+func handleDeleteBook(w http.ResponseWriter, _ *http.Request, id int) {
+	err := internal.DeleteBookByID(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+	}
 }
