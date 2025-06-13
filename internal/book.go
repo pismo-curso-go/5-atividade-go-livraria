@@ -39,11 +39,6 @@ func GetBookByID(id int) (Book, error) {
 	return Book{}, nil 
 }
 
-func DeleteBookByID(id int) error {
-	// todo
-	return nil 
-}
-
 func UpdateBook(id int, updated Book) (Book, error) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -69,4 +64,9 @@ func UpdateReadStatus(id int, read bool) (Book, error) {
 		}
 	}
 	return Book{}, errors.New("cant update read status")
+}
+
+func DeleteBookByID(id int) error {
+	// todo
+	return nil 
 }
