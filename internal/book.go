@@ -37,9 +37,9 @@ func GetBookByID(id int) (*Book, error) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	for _, book := range books {
-		if book.ID == id {
-			return &book, nil
+	for idx := range books {
+		if books[idx].ID == id {
+			return &books[idx], nil
 		}
 	}
 
@@ -80,8 +80,8 @@ func DeleteBookByID(id int) error {
 	var bookIsPresent bool
 	var bookIndex int
 
-	for idx, book := range books {
-		if book.ID == id {
+	for idx := range books {
+		if books[idx].ID == id {
 			bookIsPresent = true
 			bookIndex = idx
 			break
