@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"errors"
 	"sync"
 )
 
@@ -13,7 +12,7 @@ type Book struct {
 }
 
 var (
-	books  []Book
+	books  = []Book{}
 	nextID = 1
 	mu     sync.Mutex
 )
@@ -24,14 +23,14 @@ func GetAllBooks() []Book {
 	return books
 }
 
-func AddBook(b Book) Book {
+func AddBook(b Book) *Book {
 	mu.Lock()
 	defer mu.Unlock()
 
 	b.ID = nextID
 	nextID++
 	books = append(books, b)
-	return b
+	return &b
 }
 
 func GetBookByID(id int) (*Book, error) {
@@ -44,34 +43,34 @@ func GetBookByID(id int) (*Book, error) {
 		}
 	}
 
-	return nil, errors.New("book not found")
+	return nil, ErrBookNotFound
 }
 
-func UpdateBook(id int, updated Book) (Book, error) {
+func UpdateBook(id int, updatedBook Book) (*Book, error) {
 	mu.Lock()
 	defer mu.Unlock()
 
 	for i, book := range books {
 		if book.ID == id {
-			updated.ID = id
-			books[i] = updated
-			return updated, nil
+			updatedBook.ID = id
+			books[i] = updatedBook
+			return &updatedBook, nil
 		}
 	}
-	return Book{}, errors.New("cant update book")
+	return nil, ErrBookNotUpdated
 }
 
-func UpdateReadStatus(id int, read bool) (Book, error) {
+func UpdateReadStatus(id int, read bool) (*Book, error) {
 	mu.Lock()
 	defer mu.Unlock()
 
 	for i := range books {
 		if books[i].ID == id {
 			books[i].Read = read
-			return books[i], nil
+			return &books[i], nil
 		}
 	}
-	return Book{}, errors.New("cant update read status")
+	return nil, ErrBookStatusNotUpdated
 }
 
 func DeleteBookByID(id int) error {
@@ -91,6 +90,8 @@ func DeleteBookByID(id int) error {
 
 	if bookIsPresent {
 		books = append(books[:bookIndex], books[bookIndex+1:]...)
+		return nil
 	}
-	return nil
+
+	return ErrBookCannotBeDeleted
 }

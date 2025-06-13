@@ -27,28 +27,39 @@ func booksHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		handleAddBook(w, r)
 	default:
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		internal.WriteJSONError(internal.WriteJSONErrorParams{
+			Writer:     w,
+			HttpStatus: http.StatusMethodNotAllowed,
+			ErrMessage: internal.ErrMethodNotAllowed.Error(),
+		})
 	}
 }
 
 func handleGetBooks(w http.ResponseWriter, _ *http.Request) {
 	books := internal.GetAllBooks()
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(books)
+	internal.WriteJSONMessage(internal.WriteJSONMessageParams{
+		Writer: w,
+		Data:   books,
+	})
 }
 
 func handleAddBook(w http.ResponseWriter, r *http.Request) {
-	var book internal.Book
+	var book *internal.Book
 	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		internal.WriteJSONError(internal.WriteJSONErrorParams{
+			Writer:     w,
+			HttpStatus: http.StatusBadRequest,
+			ErrMessage: internal.ErrInvalidRequestBody.Error(),
+		})
 		return
 	}
 
-	book = internal.AddBook(book)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(book)
+	book = internal.AddBook(*book)
+	internal.WriteJSONMessage(internal.WriteJSONMessageParams{
+		Writer:     w,
+		Data:       &book,
+		HttpStatus: http.StatusCreated,
+	})
 }
 
 func bookByIDHandler(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +67,11 @@ func bookByIDHandler(w http.ResponseWriter, r *http.Request) {
 	idStr = strings.TrimSuffix(idStr, "/read")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "invalid ID", http.StatusBadRequest)
+		internal.WriteJSONError(internal.WriteJSONErrorParams{
+			Writer:     w,
+			HttpStatus: http.StatusBadRequest,
+			ErrMessage: internal.ErrInvalidID.Error(),
+		})
 		return
 	}
 
@@ -70,35 +85,56 @@ func bookByIDHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		handleDeleteBook(w, r, id)
 	default:
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		internal.WriteJSONError(internal.WriteJSONErrorParams{
+			Writer:     w,
+			HttpStatus: http.StatusMethodNotAllowed,
+			ErrMessage: internal.ErrMethodNotAllowed.Error(),
+		})
 	}
 }
 
 func handleGetBookByID(w http.ResponseWriter, _ *http.Request, id int) {
 	book, err := internal.GetBookByID(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		internal.WriteJSONError(internal.WriteJSONErrorParams{
+			Writer:     w,
+			HttpStatus: http.StatusNotFound,
+			ErrMessage: err.Error(),
+		})
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(book)
+	internal.WriteJSONMessage(internal.WriteJSONMessageParams{
+		Writer: w,
+		Data:   &book,
+	})
 }
 
 func handleUpdateBook(w http.ResponseWriter, r *http.Request, id int) {
 	var updated internal.Book
 	if err := json.NewDecoder(r.Body).Decode(&updated); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		internal.WriteJSONError(internal.WriteJSONErrorParams{
+			Writer:     w,
+			HttpStatus: http.StatusBadRequest,
+			ErrMessage: internal.ErrInvalidRequestBody.Error(),
+		})
 		return
 	}
 
 	book, err := internal.UpdateBook(id, updated)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		internal.WriteJSONError(internal.WriteJSONErrorParams{
+			Writer:     w,
+			HttpStatus: http.StatusNotFound,
+			ErrMessage: err.Error(),
+		})
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(book)
+	internal.WriteJSONMessage(internal.WriteJSONMessageParams{
+		Writer: w,
+		Data:   &book,
+	})
 }
 
 func handleUpdateReadStatus(w http.ResponseWriter, r *http.Request, id int) {
@@ -107,23 +143,40 @@ func handleUpdateReadStatus(w http.ResponseWriter, r *http.Request, id int) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		internal.WriteJSONError(internal.WriteJSONErrorParams{
+			Writer:     w,
+			HttpStatus: http.StatusBadRequest,
+			ErrMessage: internal.ErrInvalidRequestBody.Error(),
+		})
 		return
 	}
 
 	book, err := internal.UpdateReadStatus(id, data.Read)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		internal.WriteJSONError(internal.WriteJSONErrorParams{
+			Writer:     w,
+			HttpStatus: http.StatusNotFound,
+			ErrMessage: err.Error(),
+		})
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(book)
+	internal.WriteJSONMessage(internal.WriteJSONMessageParams{
+		Writer: w,
+		Data:   &book,
+	})
 }
 
 func handleDeleteBook(w http.ResponseWriter, _ *http.Request, id int) {
 	err := internal.DeleteBookByID(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		internal.WriteJSONError(internal.WriteJSONErrorParams{
+			Writer:     w,
+			HttpStatus: http.StatusNotFound,
+			ErrMessage: err.Error(),
+		})
+		return
 	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
