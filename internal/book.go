@@ -34,9 +34,17 @@ func AddBook(b Book) Book {
 	return b
 }
 
-func GetBookByID(id int) (Book, error) {
-	// todo
-	return Book{}, nil 
+func GetBookByID(id int) (*Book, error) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	for _, book := range books {
+		if book.ID == id {
+			return &book, nil
+		}
+	}
+
+	return nil, errors.New("book not found")
 }
 
 func UpdateBook(id int, updated Book) (Book, error) {
@@ -67,6 +75,22 @@ func UpdateReadStatus(id int, read bool) (Book, error) {
 }
 
 func DeleteBookByID(id int) error {
-	// todo
-	return nil 
+	mu.Lock()
+	defer mu.Unlock()
+
+	var bookIsPresent bool
+	var bookIndex int
+
+	for idx, book := range books {
+		if book.ID == id {
+			bookIsPresent = true
+			bookIndex = idx
+			break
+		}
+	}
+
+	if bookIsPresent {
+		books = append(books[:bookIndex], books[bookIndex+1:]...)
+	}
+	return nil
 }
