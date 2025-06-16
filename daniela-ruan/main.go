@@ -104,7 +104,6 @@ func editarLivro(w http.ResponseWriter, r *http.Request, id int) {
 		}
 	}
 
-	// Se o loop terminar, o livro não foi encontrado.
 	http.Error(w, "Livro não encontrado", http.StatusNotFound)
 }
 
@@ -116,13 +115,11 @@ func atualizarParcialmenteLivro(w http.ResponseWriter, r *http.Request, id int) 
 		return
 	}
 
-	// 3. Encontrar o livro e aplicar as alterações
 	var livroAtualizado Livro
 	livroEncontrado := false
 
 	for i, livro := range livros {
 		if livro.ID == id {
-			// Verifica cada campo recebido no mapa e atualiza o livro original
 			if novoTitulo, ok := alteracoes["titulo"]; ok {
 				if tituloStr, ok := novoTitulo.(string); ok {
 					livros[i].Titulo = tituloStr
@@ -161,7 +158,6 @@ func atualizarParcialmenteLivro(w http.ResponseWriter, r *http.Request, id int) 
 		return
 	}
 
-	// 4. Retornar o livro com os dados atualizados
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(livroAtualizado)
 }
