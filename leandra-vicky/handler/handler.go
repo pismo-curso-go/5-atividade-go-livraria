@@ -135,6 +135,40 @@ func UpdateById(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Livro não encontrado", http.StatusNotFound)
 }
 
+func PatchReadStatus(w http.ResponseWriter, r *http.Request) {
+	idStr := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, "/livros/"), "/lido")
+	idStr = strings.Trim(idStr, "/")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "ID inválido", http.StatusBadRequest)
+		return
+	}
+
+	var status struct {
+		Lido bool `json:"lido"`
+	}
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&status); err != nil {
+		http.Error(w, "JSON inválido", http.StatusBadRequest)
+		return
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	for i, livro := range model.Livros {
+		if livro.ID == id {
+			model.Livros[i].Lido = status.Lido
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(model.Livros[i])
+			return
+		}
+	}
+	http.Error(w, "Livro não encontrado", http.StatusNotFound)
+}
+
 // ExtrairID extrai o ID do livro da URL
 func ExtrairID(path string) (int, error) {
 	partes := strings.Split(path, "/")
