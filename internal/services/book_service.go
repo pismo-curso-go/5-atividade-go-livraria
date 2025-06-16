@@ -12,6 +12,13 @@ type BookService struct {
 	mu     sync.RWMutex
 }
 
+func NewBookService() *BookService {
+	return &BookService{
+		books:  make([]models.Book, 0),
+		nextID: 1,
+	}
+}
+
 func (bs *BookService) GetAllBooks() []models.Book {
 	bs.mu.RLock()
 	defer bs.mu.RUnlock()
