@@ -68,9 +68,27 @@ func adicionarLivro(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// func removerLivro(w http.ResponseWriter, r *http.Request) {
+func removerLivro(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
 
-// }
+	idConvertido, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, "ID inválido", http.StatusBadRequest)
+		return
+	}
+
+	for i, livro := range livros {
+		if livro.ID == idConvertido {
+			livros = append(livros[:i], livros[i+1:]...)
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(livro)
+			return
+		}
+	}
+
+	http.Error(w, "Livro não encontrado", http.StatusNotFound)
+}
 
 // func editarLivro(w, r) {}
 
@@ -81,7 +99,7 @@ func registrarRotas() *mux.Router {
 	router.HandleFunc("/livros", listrarLivros).Methods("GET")
 	router.HandleFunc("/livros/{id}", buscarLivro).Methods("GET")
 	router.HandleFunc("/livros", adicionarLivro).Methods("POST")
-	// router.HandleFunc("/livros/{id}", removerLivro).Methods("DELETE")
+	router.HandleFunc("/livros/{id}", removerLivro).Methods("DELETE")
 	// router.HandleFunc("/livros/{id}", editarLivro).Methods("PUT")
 	// router.HandleFunc("/livros/{id}/lido", marcarComoLido).Methods("PATCH")
 	return router
