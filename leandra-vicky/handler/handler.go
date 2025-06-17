@@ -66,8 +66,9 @@ func PostNewBook(w http.ResponseWriter, r *http.Request) {
 	mu.Lock()
 	defer mu.Unlock()
 
+	proximoID = len(model.Livros) + 1
 	novoLivro.ID = proximoID
-	proximoID++
+	novoLivro.Lido = false
 	model.Livros = append(model.Livros, novoLivro)
 
 	w.Header().Set("Content-Type", "application/json")
