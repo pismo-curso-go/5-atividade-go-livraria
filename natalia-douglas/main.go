@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -16,10 +17,10 @@ import (
 
 type Livro struct {
 	ID         int
-	Disponivel bool
-	Lido       bool
 	Titulo     string
 	Autor      string
+	Lido       bool
+	Disponivel bool
 }
 
 var livros []Livro
@@ -29,7 +30,26 @@ func listrarLivros(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(livros)
 }
 
-// func buscarLivro(w, r) {}
+func buscarLivro(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	idConvertido, err := strconv.Atoi(id)
+
+	if err != nil {
+		http.Error(w, "ID invalido", http.StatusBadRequest)
+		return
+	}
+
+	for _, livro := range livros {
+		if livro.ID == idConvertido {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(livro)
+			return
+		}
+	}
+	http.Error(w, "Livro não encontrado", http.StatusNotFound)
+}
 
 // func adicionarLivro(w, r) {}
 
@@ -42,7 +62,7 @@ func listrarLivros(w http.ResponseWriter, r *http.Request) {
 func registrarRotas() *mux.Router {
 	router := mux.NewRouter()
 	router.HandleFunc("/livros", listrarLivros).Methods("GET")
-	// router.HandleFunc("/livros/{id}", buscarLivro).Methods("GET")
+	router.HandleFunc("/livros/{id}", buscarLivro).Methods("GET")
 	// router.HandleFunc("/livros", adicionarLivro).Methods("POST")
 	// router.HandleFunc("/livros/{id}", removerLivro).Methods("DELETE")
 	// router.HandleFunc("/livros/{id}", editarLivro).Methods("PUT")
@@ -50,7 +70,9 @@ func registrarRotas() *mux.Router {
 	return router
 }
 func main() {
-	livros = append(livros, Livro{ID: 1, Titulo: "Dom Casmurro", Autor: "Machado de Assis", Lido: false})
+	livros = append(livros, Livro{ID: 1, Titulo: "Teste 1", Autor: "Esse livro é teste 1", Lido: false, Disponivel: true})
+	livros = append(livros, Livro{ID: 2, Titulo: "Teste 2", Autor: "Esse livro é teste 2", Lido: false, Disponivel: false})
+	livros = append(livros, Livro{ID: 3, Titulo: "Teste 3", Autor: "Esse livro é teste 3", Lido: false, Disponivel: false})
 
 	router := registrarRotas()
 	fmt.Println("Servidor rodando na porta 8000")
